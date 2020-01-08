@@ -1,1 +1,10 @@
-**/node_modules
+*
+!LICENSE
+!README.rst
+!setup.py
+!girder/
+girder/**/node_modules
+
+# TODO: remove....
+!.git/
+!plugins/
