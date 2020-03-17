@@ -247,7 +247,6 @@ var ItemListWidget = View.extend({
                     if (!mutation.addedNodes) {
                         return;
                     }
-
                     // for every added node
                     _.each(mutation.addedNodes, (node) => {
                         if (node.className && node.className.indexOf('g-item-list') !== -1) {
