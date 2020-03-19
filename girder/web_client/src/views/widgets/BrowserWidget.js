@@ -12,6 +12,7 @@ import BrowserWidgetTemplate from '@girder/core/templates/widgets/browserWidget.
 
 import '@girder/core/stylesheets/widgets/browserWidget.styl';
 import '@girder/core/utilities/jquery/girderModal';
+import { UserModel } from '../../models';
 
 /**
  * This widget provides the user with an interface similar to a filesystem
