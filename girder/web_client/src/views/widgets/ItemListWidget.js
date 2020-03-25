@@ -234,7 +234,7 @@ var ItemListWidget = View.extend({
                     this.observer.disconnect();
                     this.observer = null;
                     this.tempScrollPos = undefined;
-                    // Prevents scrolling once clicking has more
+                    // Prevents scrolling when user clicks 'show more...'
                     this._highlightItem = false;
                 }
             };
