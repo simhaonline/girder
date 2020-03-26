@@ -1,4 +1,10 @@
 ul.g-item-list
+  if (Paginated)
+    li.g-page-selection
+      a#g-go-to-page.g-view-inline Page
+      input#g-page-selection-input(type='number', min=1, max=totalPages value=currentPage)
+      span /
+      span #{totalPages}
   each item in items
     li.g-item-list-entry(class=(highlightItem && item.id === selectedItemId ? 'g-selected' : ''), public=(isParentPublic ? 'true' : 'false'))
       if checkboxes
@@ -25,3 +31,5 @@ ul.g-item-list
       a.g-show-more-items
         i.icon-level-down
         | Show more items...
+  
+      
