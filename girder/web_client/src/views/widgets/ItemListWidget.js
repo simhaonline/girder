@@ -34,10 +34,6 @@ var ItemListWidget = View.extend({
                 }
             }
             this.trigger('g:checkboxesChanged');
-        },
-        'change #g-page-selection-input': function (event) {
-            console.log(`Setting page to: ${Number(event.target.value)}`);
-            this.collection.fetchPage(Number(event.target.value));
         }
     },
 
@@ -66,44 +62,48 @@ var ItemListWidget = View.extend({
         this.collection.append = true; // Append, don't replace pages
         this.collection.filterFunc = settings.itemFilter;
         this.collection.append = false;
-        this.Paginated = true;
+        this.paginated = true;
         this.collection.pageLimit = 10;
 
-        const changedFunc = () => {
-            if (this.accessLevel !== undefined) {
-                this.collection.each((model) => {
-                    model.set('_accessLevel', this.accessLevel);
-                });
-            }
-            this.render();
-            this.trigger('g:changed');
-        };
-        const bindOnChanged = () => {
-            this.collection.on('g:changed', changedFunc, this);
-            changedFunc();
-        };
         this.collection.fetch({ folderId: settings.folderId }).done(() => {
             this.totalPages = Math.ceil(this.collection.getTotalCount() / this.collection.pageLimit);
-            if (this.collection.hasNextPage && this._selectedItem) {
+            if (this.paginated && this.collection.hasNextPage && this._selectedItem) {
                 // We need to get the position in the list
+                this.trigger('g:paginated');
                 restRequest({
                     url: `item/position/${this._selectedItem.get('_id')}`,
                     method: 'GET',
                     data: { folderId: this._selectedItem.get('folderId') }
                 }).done((val) => {
+                    // Now we fetch the correct page for the position
                     val = Number(val);
-                    console.log(`Val: ${val} pageLimit ${this.collection.pageLimit}`);
                     if (val > this.collection.pageLimit) {
                         const pageLimit = this.collection.pageLimit;
-                        const calculatePage = 1 + Math.ceil((val - (val % pageLimit)) / pageLimit);
-                        this.collection.fetchPage(calculatePage);
+                        const calculatedPage = 1 + Math.ceil((val - (val % pageLimit)) / pageLimit);
+                        this.collection.fetchPage(calculatedPage);
                     }
-                }).done(() => bindOnChanged());
-                return 0;
+                }).done(() => this.bindOnChanged());
             } else {
-                bindOnChanged();
+                this.bindOnChanged();
             }
         });
+    },
+
+    bindOnChanged: function () {
+        this.collection.on('g:changed', this.changedFunc, this);
+        this.changedFunc();
+    },
+    changedFunc: function () {
+        if (this.accessLevel !== undefined) {
+            this.collection.each((model) => {
+                model.set('_accessLevel', this.accessLevel);
+            });
+        }
+        if (this.paginated) {
+            this.currentPage = this.collection.pageNum() + 1;
+        }
+        this.render();
+        this.trigger('g:changed');
     },
 
     render: function () {
@@ -111,8 +111,7 @@ var ItemListWidget = View.extend({
         if (this._selectedItem && this._highlightItem) {
             this.scrollPositionObserver();
         }
-        const currentPage = this.collection.pageNum() + 1;
-        console.log(`PageNum: ${currentPage} offset ${this.collection.offset} length ${this.collection.length} pageLimi ${this.collection.pageLimit}`);
+
         this.$el.html(ItemListTemplate({
             items: this.collection.toArray(),
             isParentPublic: this.public,
@@ -124,15 +123,23 @@ var ItemListWidget = View.extend({
             showSizes: this._showSizes,
             highlightItem: this._highlightItem,
             selectedItemId: (this._selectedItem || {}).id,
-            Paginated: this.Paginated,
-            currentPage: currentPage,
-            totalPages: this.totalPages
+            paginated: this.paginated
+
         }));
 
         // If we set a selected item in the beginning we will center the selection while loading
         return this;
     },
 
+    /**
+     * Externally facing function to allow hierarchyWidget and others to set the current page if the item is paginated
+     * @param {Number} page - 1 index integer specifying the page to fetch
+     */
+    setPage(page) {
+        if (this.paginated && this.collection && this.collection.fetchPage) {
+            this.collection.fetchPage(page);
+        }
+    },
     /**
      * Insert an item into the collection and re-render it.
      */
