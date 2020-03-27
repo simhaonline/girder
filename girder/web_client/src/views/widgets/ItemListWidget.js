@@ -34,10 +34,6 @@ var ItemListWidget = View.extend({
                 }
             }
             this.trigger('g:checkboxesChanged');
-        },
-        'change #g-page-selection-input': function (event) {
-            console.log(`Setting page to: ${Number(event.target.value)}`);
-            this.collection.fetchPage(Number(event.target.value));
         }
     },
 
@@ -77,6 +73,7 @@ var ItemListWidget = View.extend({
                 // Tells the parent container that the item is paginated so it can render the page selector
                 this.trigger('g:paginated');
                 // We need to get the position in the list
+                this.trigger('g:paginated');
                 restRequest({
                     url: `item/position/${this._selectedItem.get('_id')}`,
                     method: 'GET',
@@ -118,8 +115,7 @@ var ItemListWidget = View.extend({
         if (this._selectedItem && this._highlightItem) {
             this.scrollPositionObserver();
         }
-        const currentPage = this.collection.pageNum() + 1;
-        console.log(`PageNum: ${currentPage} offset ${this.collection.offset} length ${this.collection.length} pageLimi ${this.collection.pageLimit}`);
+
         this.$el.html(ItemListTemplate({
             items: this.collection.toArray(),
             isParentPublic: this.public,

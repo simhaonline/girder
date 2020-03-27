@@ -29,6 +29,7 @@ import HierarchyWidgetTemplate from '@girder/core/templates/widgets/hierarchyWid
 import '@girder/core/stylesheets/widgets/hierarchyWidget.styl';
 
 import 'bootstrap/js/dropdown';
+import { TextHighlightRules } from 'jsoneditor/dist/jsoneditor';
 
 var pickedResources = null;
 
@@ -326,7 +327,6 @@ var HierarchyWidget = View.extend({
         }
 
         this.breadcrumbView.setElement(this.$('.g-hierarchy-breadcrumb-bar>ol')).render();
-
         this.checkedMenuWidget.dropdownToggle = this.$('.g-checked-actions-button');
         this.checkedMenuWidget.setElement(this.$('.g-checked-actions-menu')).render();
         this.folderListView.setElement(this.$('.g-folder-list-container')).render();
