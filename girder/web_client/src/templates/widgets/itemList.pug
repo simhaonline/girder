@@ -1,5 +1,5 @@
 ul.g-item-list
-  if (Paginated)
+  if (paginated && false)
     li.g-page-selection
       a#g-go-to-page.g-view-inline Page
       input#g-page-selection-input(type='number', min=1, max=totalPages value=currentPage)
@@ -26,7 +26,7 @@ ul.g-item-list
           i.icon-eye
       if showSizes
         .g-item-size= formatSize(item.get('size'))  
-  if (hasMore && !Paginated)
+  if (hasMore && !paginated)
     li.g-show-more
       a.g-show-more-items
         i.icon-level-down

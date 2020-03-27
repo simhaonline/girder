@@ -23,11 +23,13 @@ import { getModelClassByName, renderMarkdown, formatCount, capitalize, formatSiz
 import { restRequest, getApiRoot } from '@girder/core/rest';
 
 import HierarchyBreadcrumbTemplate from '@girder/core/templates/widgets/hierarchyBreadcrumb.pug';
+import HierarchyPaginatedTemplate from '@girder/core/templates/widgets/hierarchyPaginated.pug';
 import HierarchyWidgetTemplate from '@girder/core/templates/widgets/hierarchyWidget.pug';
 
 import '@girder/core/stylesheets/widgets/hierarchyWidget.styl';
 
 import 'bootstrap/js/dropdown';
+import { TextHighlightRules } from 'jsoneditor/dist/jsoneditor';
 
 var pickedResources = null;
 
@@ -61,6 +63,26 @@ var HierarchyBreadcrumbView = View.extend({
             links: objects,
             current: active,
             descriptionText: descriptionText
+        }));
+
+        return this;
+    }
+});
+
+var HierarchyPaginatedView = View.extend({
+    events: {
+        'change #g-page-selection-input': function (event) {
+            console.log(`Setting page to: ${Number(event.target.value)}`);
+            this.itemListWidget.setPage(Number(event.target.value));
+        }
+    },
+    initialize: function (settings) {
+        this.itemListWidget = settings.itemListWidget;
+    },
+    render: function () {
+        this.$el.html(HierarchyPaginatedTemplate({
+            totalPages: this.itemListWidget && this.itemListWidget.totalPages,
+            currentPage: this.itemListWidget && this.itemListWidget.currentPage
         }));
 
         return this;
@@ -231,6 +253,19 @@ var HierarchyWidget = View.extend({
             this.listenTo(this.itemListView, 'g:changed', () => {
                 this.itemCount = this.itemListView.collection.length;
                 this._childCountCheck();
+                if (this.hierarchyPaginated) {
+                    this.hierarchyPaginated.render();
+                }
+            });
+            this.listenTo(this.itemListView, 'g:paginated', () => {
+                if (!this.hierarchyPaginated) {
+                    this.hierarchyPaginated = new HierarchyPaginatedView({ itemListWidget: this.itemListView });
+                    this.render();
+                }
+                $('.g-hierarchy-breadcrumb-bar').addClass('g-hierarchy-sticky');
+                $('.g-hierarachy-paginated-bar').addClass('g-hierarchy-sticky');
+                $('.g-hierarchy-breadcrumb-bar').css({ top: 0 });
+                $('.g-hierarachy-paginated-bar').css({ bottom: 0 });
             });
         }
 
@@ -278,6 +313,7 @@ var HierarchyWidget = View.extend({
             checkboxes: this._checkboxes,
             capitalize: capitalize,
             itemFilter: this._itemFilter
+
         }));
 
         if (this.$('.g-folder-actions-menu>li>a').length === 0) {
@@ -286,6 +322,9 @@ var HierarchyWidget = View.extend({
         }
 
         this.breadcrumbView.setElement(this.$('.g-hierarchy-breadcrumb-bar>ol')).render();
+        if (this.hierarchyPaginated) {
+            this.hierarchyPaginated.setElement(this.$('.g-hierarachy-paginated-bar')).render();
+        }
         this.checkedMenuWidget.dropdownToggle = this.$('.g-checked-actions-button');
         this.checkedMenuWidget.setElement(this.$('.g-checked-actions-menu')).render();
         this.folderListView.setElement(this.$('.g-folder-list-container')).render();
