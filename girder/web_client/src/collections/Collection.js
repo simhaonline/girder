@@ -69,11 +69,13 @@ var Collection = Backbone.Collection.extend({
     hasNextPage: function () {
         return this._hasMorePages;
     },
-
+    /**
+     *  This value is populated whenever the list length exceeds the pageLimit.
+     *  It is used to determine how many pages are needed based on the page limit
+     */
     getTotalCount: function () {
-        return this._totalCount;
+        return this._totalCount || 1;
     },
-
     /**
      * Fetch the previous page of this collection, emitting g:changed when done.
      */
