@@ -74,6 +74,7 @@ var ItemListWidget = View.extend({
                 this.trigger('g:paginated');
                 // We need to get the position in the list
                 this.trigger('g:paginated');
+                // We need to get the position in the list
                 restRequest({
                     url: `item/position/${this._selectedItem.get('_id')}`,
                     method: 'GET',

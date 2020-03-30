@@ -29,7 +29,6 @@ import HierarchyWidgetTemplate from '@girder/core/templates/widgets/hierarchyWid
 import '@girder/core/stylesheets/widgets/hierarchyWidget.styl';
 
 import 'bootstrap/js/dropdown';
-import { TextHighlightRules } from 'jsoneditor/dist/jsoneditor';
 
 var pickedResources = null;
 
