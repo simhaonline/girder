@@ -29,7 +29,6 @@ import HierarchyWidgetTemplate from '@girder/core/templates/widgets/hierarchyWid
 import '@girder/core/stylesheets/widgets/hierarchyWidget.styl';
 
 import 'bootstrap/js/dropdown';
-import { TextHighlightRules } from 'jsoneditor/dist/jsoneditor';
 
 var pickedResources = null;
 
@@ -136,6 +135,7 @@ var HierarchyWidget = View.extend({
      *                  event as its second.
      *   [defaultSelectedResource] : default selected Resource item , will open up to this resource
      *   [highlightItem=false] : sets the item to be styled as selected and will scroll to it in the list
+     *   [paginated=false] : sets the itemlist view to be paginated, will nset appendPages to false
      */
     initialize: function (settings) {
         this.parentModel = settings.parentModel;
@@ -158,7 +158,7 @@ var HierarchyWidget = View.extend({
         };
         this._defaultSelectedResource = settings.defaultSelectedResource;
         this._highlightItem = _.has(settings, 'highlightItem') ? settings.highlightItem : false;
-
+        this._paginated = _.has(settings, 'paginated') ? settings.paginated : false;
         this._onFolderSelect = settings.onFolderSelect;
 
         this.folderAccess = settings.folderAccess;
@@ -246,26 +246,30 @@ var HierarchyWidget = View.extend({
                 showSizes: this._showSizes,
                 selectedItem: this._defaultSelectedResource,
                 highlightItem: this._highlightItem,
+                paginated: this._paginated,
                 parentView: this
             });
             this.listenTo(this.itemListView, 'g:itemClicked', this._onItemClick);
             this.listenTo(this.itemListView, 'g:checkboxesChanged', this.updateChecked);
+
             this.listenTo(this.itemListView, 'g:changed', () => {
                 this.itemCount = this.itemListView.collection.length;
                 this._childCountCheck();
-                if (this.hierarchyPaginated) {
-                    this.hierarchyPaginated.render();
+                if (this._paginated && this.hierarchyPaginated && this.itemListView.totalPages > 1) {
+                    this.render();
+                    $('.g-hierarchy-breadcrumb-bar').addClass('g-hierarchy-sticky');
+                    $('.g-hierarachy-paginated-bar').addClass('g-hierarchy-sticky');
+                    $('.g-hierarchy-breadcrumb-bar').css({ top: 0 });
+                    $('.g-hierarachy-paginated-bar').css({ bottom: 0 });
+                } else {
+                    $('.g-hierarachy-paginated-bar').remove();
                 }
             });
+            // Only emitted when there is more than one page of data
             this.listenTo(this.itemListView, 'g:paginated', () => {
-                if (!this.hierarchyPaginated) {
+                if (this._paginated && !this.hierarchyPaginated) {
                     this.hierarchyPaginated = new HierarchyPaginatedView({ itemListWidget: this.itemListView });
-                    this.render();
                 }
-                $('.g-hierarchy-breadcrumb-bar').addClass('g-hierarchy-sticky');
-                $('.g-hierarachy-paginated-bar').addClass('g-hierarchy-sticky');
-                $('.g-hierarchy-breadcrumb-bar').css({ top: 0 });
-                $('.g-hierarachy-paginated-bar').css({ bottom: 0 });
             });
         }
 
@@ -322,13 +326,13 @@ var HierarchyWidget = View.extend({
         }
 
         this.breadcrumbView.setElement(this.$('.g-hierarchy-breadcrumb-bar>ol')).render();
-        if (this.hierarchyPaginated) {
-            this.hierarchyPaginated.setElement(this.$('.g-hierarachy-paginated-bar')).render();
-        }
+
         this.checkedMenuWidget.dropdownToggle = this.$('.g-checked-actions-button');
         this.checkedMenuWidget.setElement(this.$('.g-checked-actions-menu')).render();
         this.folderListView.setElement(this.$('.g-folder-list-container')).render();
-
+        if (this.hierarchyPaginated && this.parentModel.resourceName !== 'collection') {
+            this.hierarchyPaginated.setElement(this.$('.g-hierarachy-paginated-bar')).render();
+        }
         if (this.parentModel.resourceName === 'folder' && this._showItems) {
             this._initFolderViewSubwidgets();
             this.itemListView.setElement(this.$('.g-item-list-container')).render();

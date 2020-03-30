@@ -48,6 +48,8 @@ var ItemListWidget = View.extend({
             _.has(settings, 'showSizes') ? settings.showSizes : true);
         this._highlightItem = (
             _.has(settings, 'highlightItem') ? settings.highlightItem : false);
+        this._paginated = (
+            _.has(settings, 'paginated') ? settings.paginated : false);
 
         this.accessLevel = settings.accessLevel;
         this.public = settings.public;
@@ -61,15 +63,16 @@ var ItemListWidget = View.extend({
         this.collection = new ItemCollection();
         this.collection.append = true; // Append, don't replace pages
         this.collection.filterFunc = settings.itemFilter;
-        this.collection.append = false;
-        this.paginated = true;
-        this.collection.pageLimit = 10;
+        if (this._paginated) {
+            this.collection.append = false;
+        }
 
         this.collection.fetch({ folderId: settings.folderId }).done(() => {
             this.totalPages = Math.ceil(this.collection.getTotalCount() / this.collection.pageLimit);
-            if (this.paginated && this.collection.hasNextPage && this._selectedItem) {
-                // We need to get the position in the list
+            if (this._paginated && this.collection.hasNextPage && this._selectedItem) {
+                // Tells the parent container that the item is paginated so it can render the page selector
                 this.trigger('g:paginated');
+                // We need to get the position in the list
                 restRequest({
                     url: `item/position/${this._selectedItem.get('_id')}`,
                     method: 'GET',
@@ -99,7 +102,7 @@ var ItemListWidget = View.extend({
                 model.set('_accessLevel', this.accessLevel);
             });
         }
-        if (this.paginated) {
+        if (this._paginated) {
             this.currentPage = this.collection.pageNum() + 1;
         }
         this.render();
@@ -123,7 +126,7 @@ var ItemListWidget = View.extend({
             showSizes: this._showSizes,
             highlightItem: this._highlightItem,
             selectedItemId: (this._selectedItem || {}).id,
-            paginated: this.paginated
+            paginated: this._paginated
 
         }));
 
@@ -136,7 +139,7 @@ var ItemListWidget = View.extend({
      * @param {Number} page - 1 index integer specifying the page to fetch
      */
     setPage(page) {
-        if (this.paginated && this.collection && this.collection.fetchPage) {
+        if (this._paginated && this.collection && this.collection.fetchPage) {
             this.collection.fetchPage(page);
         }
     },
