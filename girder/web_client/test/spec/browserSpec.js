@@ -883,7 +883,7 @@ describe('browser hierarchy selection', function () {
 
         waitsFor(function () {
             return $('.g-hierarchy-widget').length > 0 &&
-                               $('.g-item-list-link').length > 0 && 
+                               $('.g-item-list-link').length > 0 &&
                                 $('.g-item-list-entry.g-selected').length > 0;
         }, 'the hierarchy widget to display');
 
@@ -898,7 +898,7 @@ describe('browser hierarchy selection', function () {
             // force a centerSelected scroll event
             widget._hierarchyView.itemListView.centerSelected();
             var scrollnamespace = null;
-            if (((($._data(widgetcontainer[0], 'events') || {} ).scroll[0]) || {}).namespace) {
+            if (((($._data(widgetcontainer[0], 'events') || {}).scroll[0]) || {}).namespace) {
                 scrollnamespace = $._data(widgetcontainer[0], 'events').scroll[0].namespace;
                 expect(scrollnamespace).toBe('observerscroll');
             }
