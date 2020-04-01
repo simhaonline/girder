@@ -1155,11 +1155,6 @@ describe('browser hierarchy paginated selection', function () {
         }, 'Make sure paginated text is displayed with proper settings');
 
         runs(function () {
-            waits(3000);
-            console.log('__SCREENSHOT__loadedlist');
-        });
-
-        runs(function () {
             $('.g-folder-list-link').trigger('click');
         });
 
@@ -1176,15 +1171,15 @@ describe('browser hierarchy paginated selection', function () {
             return $('.g-hierarachy-paginated-bar').length === 1 && $('.g-item-list-entry').length > 10;
         }, 'The removal of the page selection');
 
-        runs(function () {
-            expect($('.g-hierarachy-paginated-bar').length).toBe(1);
-            // expect($('#g-page-selection-input').val()).toBe('1');
-            expect($('.g-hierarchy-breadcrumb-bar').hasClass('g-hierarchy-sticky')).toBe(true);
-        }, 'Returning to the folder should bring us to the first page');
+        waitsFor(function () {
+            console.log($('#g-page-selection-input').val());
+            return $('#g-page-selection-input').val() === '1';
+        }, 'waits for it to go to the second page');
 
         runs(function () {
-            waits(1000);
-            console.log('__SCREENSHOT__clicksubfolder');
-        });
+            expect($('.g-hierarachy-paginated-bar').length).toBe(1);
+            expect($('#g-page-selection-input').val()).toBe('1');
+            expect($('.g-hierarchy-breadcrumb-bar').hasClass('g-hierarchy-sticky')).toBe(true);
+        }, 'Returning to the folder should bring us to the first page');
     });
 });
