@@ -63,6 +63,8 @@ var ItemListWidget = View.extend({
         this.collection = new ItemCollection();
         this.collection.append = true; // Append, don't replace pages
         this.collection.filterFunc = settings.itemFilter;
+        this.currentPage = 1; // By default we want to be on the first page
+
         if (this._paginated) {
             this.collection.append = false;
         }
