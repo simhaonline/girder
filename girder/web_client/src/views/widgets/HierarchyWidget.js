@@ -71,7 +71,6 @@ var HierarchyBreadcrumbView = View.extend({
 var HierarchyPaginatedView = View.extend({
     events: {
         'change #g-page-selection-input': function (event) {
-            console.log(`Setting page to: ${Number(event.target.value)}`);
             this.itemListWidget.setPage(Number(event.target.value));
         }
     },
@@ -268,7 +267,10 @@ var HierarchyWidget = View.extend({
             // Only emitted when there is more than one page of data
             this.listenTo(this.itemListView, 'g:paginated', () => {
                 if (this._paginated && !this.hierarchyPaginated) {
-                    this.hierarchyPaginated = new HierarchyPaginatedView({ itemListWidget: this.itemListView });
+                    this.hierarchyPaginated = new HierarchyPaginatedView({
+                        parentView: this,
+                        itemListWidget: this.itemListView
+                    });
                 }
             });
         }

@@ -80,7 +80,7 @@ var ItemListWidget = View.extend({
                 }).done((val) => {
                     // Now we fetch the correct page for the position
                     val = Number(val);
-                    if (val > this.collection.pageLimit) {
+                    if (val >= this.collection.pageLimit) {
                         const pageLimit = this.collection.pageLimit;
                         const calculatedPage = 1 + Math.ceil((val - (val % pageLimit)) / pageLimit);
                         this.collection.fetchPage(calculatedPage);
