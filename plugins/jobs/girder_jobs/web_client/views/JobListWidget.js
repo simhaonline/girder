@@ -37,7 +37,7 @@ var JobListWidget = View.extend({
             } else {
                 delete this.jobCheckedStates[jobId];
             }
-            this._renderData();
+            this._updateCheckedStatus();
         },
         'click input.g-job-checkbox-all': function (e) {
             e.stopPropagation();
@@ -48,7 +48,8 @@ var JobListWidget = View.extend({
             } else {
                 this.jobCheckedStates = {};
             }
-            this._renderData();
+            this.$('.g-job-checkbox').prop('checked', $(e.currentTarget).is(':checked'));
+            this._updateCheckedStatus();
         },
         'click .check-menu-dropdown a.g-jobs-list-cancel': function (e) {
             this._cancelJobs();
@@ -263,6 +264,13 @@ var JobListWidget = View.extend({
         if (this.showPaging) {
             this.paginateWidget.setElement(this.$('.g-job-pagination')).render();
         }
+    },
+
+    _updateCheckedStatus: function () {
+        const anyJobChecked = _.find(this.jobCheckedStates, (status) => status === true);
+        const allJobChecked = this.collection.every((job) => this.jobCheckedStates[job.id]);
+        this.$('.g-job-checkbox-all').prop('checked', allJobChecked);
+        this.$('.g-job-check-menu-button').prop('disabled', !anyJobChecked);
     },
 
     _statusChange: function (event) {
